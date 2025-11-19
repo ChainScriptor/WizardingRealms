@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wizarding Realms - WASM Game</title>
+    <style>
+      html, body { height: 100%; margin: 0; background: #0b1020; overflow: hidden; }
+      #root { height: 100%; display: grid; place-items: center; }
+      canvas { background: radial-gradient(60% 60% at 50% 40%, #111a33 0%, #0b1020 60%, #050811 100%); box-shadow: 0 0 40px rgba(58,155,255,0.25) inset; border-radius: 12px; }
+      #loader { position: fixed; top: 14px; left: 14px; color: #cbd5e1; font: 14px/1.2 system-ui, sans-serif; }
+    </style>
+  </head>
+  <body>
+    <div id="loader">Loading WASM...</div>
+    <div id="root">
+      <canvas id="game" width="960" height="540"></canvas>
+    </div>
+    <script src="./wasm_exec.js"></script>
+    <script>
+      // Make Go global available in some browsers
+      if (typeof Go === 'undefined' && typeof globalThis !== 'undefined') {
+        window.Go = globalThis.Go
+      }
+    </script>
+    <script>
+      const go = new Go();
+      WebAssembly.instantiateStreaming(fetch("./game.wasm"), go.importObject)
+        .then((result) => go.run(result.instance))
+        .then(() => document.getElementById('loader').textContent = '')
+        .catch((e) => {
+          document.getElementById('loader').textContent = 'Failed to load WASM: ' + e;
+          console.error(e);
+        });
+    </script>
+  </body>
+  </html>
+

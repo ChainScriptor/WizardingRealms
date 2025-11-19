@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dark parchment / book vibe */
+:root {
+  --glow: 0 0 24px rgba(63, 173, 255, 0.35);
+  --gold-glow: 0 0 24px rgba(245, 158, 11, 0.35);
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+.glow-text {
+  text-shadow: 0 0 10px rgba(91, 191, 255, 0.5), 0 0 20px rgba(91, 191, 255, 0.3);
+}
+
+.gold-glow-text {
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.6), 0 0 24px rgba(245, 158, 11, 0.3);
+}
+
+/* Flip card helper */
+.flip {
+  transform-style: preserve-3d;
+}
+.flip-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease;
+}
+.flip:hover .flip-inner {
+  transform: rotateY(180deg);
+}
+.flip-face {
+  backface-visibility: hidden;
+}
+.flip-back {
+  transform: rotateY(180deg);
+}
+
+/* Masonry via columns */
+.masonry {
+  column-gap: 1rem;
+}
+.masonry > * {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+}
+
+/* Subtle grain overlay */
+.grain::before {
+  content: '';
+  position: fixed;
+  pointer-events: none;
+  inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1520256862855-398228c41684?q=80&w=1200&auto=format&fit=crop');
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+}
+

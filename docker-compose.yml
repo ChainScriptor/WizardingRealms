@@ -1,0 +1,43 @@
+services:
+  web:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    ports:
+      - "${WEB_PORT:-5174}:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./:/app
+    depends_on:
+      - wasm
+
+  wasm:
+    image: golang:1.22-alpine
+    working_dir: /app
+    command: sh -c "apk add --no-cache make git build-base && make serve"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./wasm-game:/app
+    environment:
+      - PORT=8080
+      - DATABASE_URL=postgres://wizard:wizard@postgres:5432/wizarding_realms?sslmode=disable
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=wizard
+      - POSTGRES_PASSWORD=wizard
+      - POSTGRES_DB=wizarding_realms
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata: {}
+
+

@@ -1,0 +1,11 @@
+[package]
+name = "wizarding_realms_land"
+version = "0.0.1"
+
+[addresses]
+wr = "0x0"
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "main" }
+
+
