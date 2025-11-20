@@ -57,7 +57,7 @@ func openDB() (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	db := sql.OpenDB(stdlib.RegisterConnConfig(cfg))
+	db := stdlib.OpenDB(*cfg)
 	db.SetMaxOpenConns(10)
 	db.SetMaxIdleConns(5)
 	db.SetConnMaxLifetime(time.Hour)

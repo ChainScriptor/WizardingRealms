@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import MainLayout from '@/components/MainLayout'
 import CheckinGrid from '@/components/CheckinGrid'
 import AchievementList from '@/components/AchievementList'
 import { Checkins, loadCheckins } from '@/utils/checkin'
@@ -13,11 +14,13 @@ export default function Achievements() {
   }, [])
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 space-y-4">
-      <div className="font-wizard text-3xl glow-text">Achievements</div>
-      <CheckinGrid />
-      <AchievementList checkins={checkins} />
-    </div>
+    <MainLayout>
+      <div className="space-y-4">
+        <div className="font-wizard text-3xl glow-text">Achievements</div>
+        <CheckinGrid />
+        <AchievementList checkins={checkins} />
+      </div>
+    </MainLayout>
   )
 }
 

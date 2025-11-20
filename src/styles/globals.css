@@ -6,10 +6,62 @@
 :root {
   --glow: 0 0 24px rgba(63, 173, 255, 0.35);
   --gold-glow: 0 0 24px rgba(245, 158, 11, 0.35);
+  
+  /* shadcn/ui color variables */
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 217.2 91.2% 59.8%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 224.3 76.3% 48%;
 }
 
 html, body, #root {
   height: 100%;
+}
+
+/* Default text styling for better readability */
+body {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Make headings and important text bolder */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Make buttons and interactive elements bolder */
+button, a {
+  font-weight: 600;
+}
+
+/* Make labels and form elements more readable */
+label {
+  font-weight: 600;
+}
+
+/* Make table text more readable */
+table {
+  font-weight: 500;
+}
+
+td, th {
+  font-weight: 500;
 }
 
 .glow-text {
@@ -57,5 +109,21 @@ html, body, #root {
   background-image: url('https://images.unsplash.com/photo-1520256862855-398228c41684?q=80&w=1200&auto=format&fit=crop');
   opacity: 0.05;
   mix-blend-mode: overlay;
+}
+
+/* Fade in animation for subtitles */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
 }
 

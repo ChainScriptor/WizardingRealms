@@ -47,6 +47,12 @@ func onKeyDown(this js.Value, args []js.Value) any {
 	if k == " " || k == "Spacebar" {
 		// claim current tile
 		go claimCurrentTile()
+	} else if k == "+" || k == "=" {
+		game.AdjustZoom(0.1)
+		return nil
+	} else if k == "-" || k == "_" {
+		game.AdjustZoom(-0.1)
+		return nil
 	}
 	game.Input[k] = true
 	return nil

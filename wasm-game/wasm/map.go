@@ -2,6 +2,15 @@ package main
 
 import "syscall/js"
 
+const (
+	TileForest = iota
+	TileWall
+	TileForbidden
+	TileLake
+	TileMountain
+	TileDesert
+)
+
 type TileMap struct {
 	Cols int
 	Rows int
@@ -16,27 +25,40 @@ func NewTileMap(cols, rows, tile int) *TileMap {
 		Tile: tile,
 		data: make([]int, cols*rows),
 	}
-	// Generate simple biomes: forest/lake/forbidden with patterns
-	for y := 0; y < rows; y++ {
-		for x := 0; x < cols; x++ {
-			// borders forbidden
-			if x == 0 || y == 0 || x == cols-1 || y == rows-1 {
-				m.Set(x, y, 2) // forbidden
+	generateBiomes(m)
+	return m
+}
+
+func generateBiomes(m *TileMap) {
+	for y := 0; y < m.Rows; y++ {
+		for x := 0; x < m.Cols; x++ {
+			if x == 0 || y == 0 || x == m.Cols-1 || y == m.Rows-1 {
+				m.Set(x, y, TileForbidden)
 				continue
 			}
-			// lakes as circles
-			cx, cy := cols/3, rows/3
-			dx := x - cx
-			dy := y - cy
-			if dx*dx+dy*dy < 400 {
-				m.Set(x, y, 3) // lake
-				continue
+			noise := pseudoNoise(x, y)
+			switch {
+			case noise < 4:
+				m.Set(x, y, TileLake)
+			case noise < 10:
+				m.Set(x, y, TileMountain)
+			case noise < 16:
+				m.Set(x, y, TileWall)
+			case noise < 22:
+				m.Set(x, y, TileDesert)
+			default:
+				m.Set(x, y, TileForest)
 			}
-			// forest default
-			m.Set(x, y, 0)
 		}
 	}
-	return m
+}
+
+func pseudoNoise(x, y int) int {
+	n := (x*92837111 + y*689287499) ^ (x*y + 374761393)
+	if n < 0 {
+		n = -n
+	}
+	return n % 100
 }
 
 func (m *TileMap) Width() int  { return m.Cols }
@@ -56,7 +78,8 @@ func (m *TileMap) Collides(px, py, pw, ph float64) bool {
 			if x < 0 || y < 0 || x >= m.Cols || y >= m.Rows {
 				return true
 			}
-			if m.Get(x, y) == 1 {
+			tile := m.Get(x, y)
+			if tile == TileWall || tile == TileForbidden || tile == TileLake || tile == TileMountain {
 				return true
 			}
 		}
@@ -78,12 +101,18 @@ func (m *TileMap) DrawViewport(ctx js.Value, camX, camY, w, h int) {
 	for y := firstY; y <= lastY; y++ {
 		for x := firstX; x <= lastX; x++ {
 			switch m.Get(x, y) {
-			case 2:
-				ctx.Set("fillStyle", "#3b1d1d") // forbidden
-			case 3:
-				ctx.Set("fillStyle", "#0f2a3a") // lake
+			case TileForbidden:
+				ctx.Set("fillStyle", "#251414")
+			case TileLake:
+				ctx.Set("fillStyle", "#123d63")
+			case TileMountain:
+				ctx.Set("fillStyle", "#2b2f3d")
+			case TileWall:
+				ctx.Set("fillStyle", "#3b3b45")
+			case TileDesert:
+				ctx.Set("fillStyle", "#5b420f")
 			default:
-				ctx.Set("fillStyle", "#0f172a") // forest
+				ctx.Set("fillStyle", "#0f1b2d")
 			}
 			ctx.Call("fillRect", x*m.Tile-camX, y*m.Tile-camY, m.Tile-1, m.Tile-1)
 		}

@@ -6,12 +6,33 @@ import TopBar from './components/TopBar'
 import Dashboard from './pages/Dashboard'
 import WizardLands from './pages/WizardLands'
 import Achievements from './pages/Achievements'
+import Swap from './pages/Swap'
+import Bridge from './pages/Bridge'
+import YouFoundMe from './pages/YouFoundMe'
+import Leaderboard from './pages/Leaderboard'
 
 export default function App() {
   const location = useLocation()
   const isWizardLands = location.pathname === '/wizard-lands'
   return (
-    <div className="min-h-screen bg-parchment-900 bg-texture bg-blend-multiply bg-fixed">
+    <div className="min-h-screen bg-parchment-900 relative">
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="fixed inset-0 w-full h-full object-cover opacity-30 -z-10"
+        style={{
+          objectPosition: 'center 45%',
+          transform: 'scale(1.4)'
+        }}
+      >
+        <source src="/video.mp4" type="video/mp4" />
+      </video>
+      {/* Dark overlay */}
+      <div className="fixed inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60 -z-10" />
+      
       {!isWizardLands && <TopBar />}
       <Routes>
         <Route path="/" element={<Dashboard />} />
@@ -20,6 +41,10 @@ export default function App() {
         <Route path="/plot/:id" element={<PlotDetail />} />
         <Route path="/achievements" element={<Achievements />} />
         <Route path="/wizard-lands" element={<WizardLands />} />
+        <Route path="/bridge" element={<Bridge />} />
+        <Route path="/swap" element={<Swap />} />
+        <Route path="/you-found-me" element={<YouFoundMe />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>

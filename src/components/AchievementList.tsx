@@ -24,20 +24,35 @@ export default function AchievementList({ checkins }: { checkins: Checkins }) {
     <div className="rounded-xl bg-zinc-900/70 ring-1 ring-zinc-700/60 p-4">
       <div className="font-semibold mb-3">Achievements</div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {ACHIEVEMENTS.map((a) => {
+        {ACHIEVEMENTS.map((a, index) => {
           const unlocked = streak >= a.threshold
+          const badgeNumber = index + 2 // 2.png, 3.png, ..., 13.png
           return (
             <div
               key={a.id}
-              className={`rounded-xl p-4 ring-1 transition ${
+              className={`rounded-xl p-4 ring-1 transition relative flex flex-col items-center ${
                 unlocked ? 'bg-zinc-800/60 ring-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.25)]' : 'bg-zinc-800/40 ring-zinc-700/60 opacity-90'
               }`}
             >
-              <div className="flex items-center justify-between">
-                <div className="font-semibold">{a.title}</div>
-                <div className={`text-xs ${unlocked ? 'text-emerald-400' : 'text-zinc-400'}`}>{unlocked ? 'Unlocked' : `${streak}/${a.threshold}`}</div>
+              {/* Badge Image */}
+              <div className="flex justify-center mb-3">
+                <img
+                  src={`/${badgeNumber}.png`}
+                  alt={`Badge ${badgeNumber}`}
+                  className={`w-20 h-20 object-contain ${unlocked ? 'opacity-100' : 'opacity-60'}`}
+                />
               </div>
-              {a.xp && <div className="mt-1 text-xs text-amber-300">+{a.xp.toLocaleString()} XP</div>}
+              {/* Day Streak Title - Centered */}
+              <div className="text-center mb-2">
+                <div className="font-semibold">{a.title}</div>
+              </div>
+              {/* Status and XP */}
+              <div className="flex items-center justify-between w-full mt-auto">
+                <div className={`text-xs ${unlocked ? 'text-emerald-400' : 'text-zinc-400'}`}>
+                  {unlocked ? 'Unlocked' : `${streak}/${a.threshold}`}
+                </div>
+                {a.xp && <div className="text-xs text-amber-300">+{a.xp.toLocaleString()} XP</div>}
+              </div>
             </div>
           )
         })}

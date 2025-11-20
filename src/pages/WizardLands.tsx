@@ -1,11 +1,21 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 // Primary background from public root and a fallback asset
 // Place your file at: public/background.jpg
 const BG_PRIMARY = '/background.jpg'
 const BG_FALLBACK = '/assets/wizard-lands-bg.jpg'
+const WASM_GAME_URL =
+  import.meta.env.VITE_WASM_GAME_URL ?? 'http://localhost:8080/web/'
 
 export default function WizardLands() {
+  const [gameOpen, setGameOpen] = useState(false)
+
+  const handlePlay = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault()
+    setGameOpen(true)
+  }
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Background */}
@@ -24,7 +34,8 @@ export default function WizardLands() {
             </Link>
             <div className="font-wizard text-xl glow-text">Wizard Lands • Genesis</div>
             <a
-              href="#"
+              href={WASM_GAME_URL}
+              onClick={handlePlay}
               className="rounded-lg bg-gradient-to-r from-mana-600 to-amber-500 px-4 py-1.5 text-zinc-900 font-semibold shadow-glow"
             >
               Play
@@ -64,6 +75,25 @@ export default function WizardLands() {
           </div>
         </div>
       </div>
+
+      {gameOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4">
+          <div className="relative w-full max-w-5xl aspect-video rounded-2xl overflow-hidden ring-2 ring-mana-500/70 shadow-glow">
+            <iframe
+              src={WASM_GAME_URL}
+              title="Wizard Lands WASM Game"
+              className="h-full w-full border-0 bg-black"
+              allow="fullscreen"
+            />
+            <button
+              onClick={() => setGameOpen(false)}
+              className="absolute top-3 right-3 rounded-full bg-black/70 px-3 py-1 text-sm font-semibold text-white hover:bg-black/90 transition"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

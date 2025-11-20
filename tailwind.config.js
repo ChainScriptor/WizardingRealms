@@ -5,9 +5,17 @@ export default {
   theme: {
     extend: {
       fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         rune: ['"Uncial Antiqua"', 'serif'],
         wizard: ['"Cinzel Decorative"', 'serif'],
         parchment: ['"IM Fell English"', 'serif']
+      },
+      fontWeight: {
+        normal: '500',
+        medium: '600',
+        semibold: '700',
+        bold: '800',
+        extrabold: '900'
       },
       colors: {
         parchment: {
@@ -29,6 +37,40 @@ export default {
           epic: '#a78bfa',
           legendary: '#f59e0b',
           mythic: '#f472b6'
+        },
+        // shadcn/ui colors
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))'
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))'
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))'
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))'
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))'
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))'
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))'
         }
       },
       boxShadow: {
