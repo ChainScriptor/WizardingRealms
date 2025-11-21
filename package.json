@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc -b --pretty false"
+    "typecheck": "tsc -b --pretty false",
+    "start": "npm run dev"
   },
   "dependencies": {
     "@mysten/dapp-kit": "^0.19.8",

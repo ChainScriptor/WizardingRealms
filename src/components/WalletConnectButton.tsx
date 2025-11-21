@@ -1,86 +1,161 @@
-import { useCallback, useMemo, useState } from 'react'
-import { useWalletKit } from '@mysten/wallet-kit'
+import { useState } from 'react'
+import { createPortal } from 'react-dom'
+import {
+  useCurrentAccount,
+  useConnectWallet,
+  useDisconnectWallet,
+  useWallets,
+} from '@mysten/dapp-kit'
 
-const SUI_WALLETS = [
-  { name: 'Suiet', icon: '/wallets/suiet.png' },
-  { name: 'Sui Wallet', icon: '/wallets/sui-wallet.png' },
-  { name: 'Ethos Wallet', icon: '/wallets/ethos.png' },
-  { name: 'OKX Wallet', icon: '/wallets/okx.png' },
-  { name: 'Nightly', icon: '/wallets/nightly.png' },
-  { name: 'Martian Wallet', icon: '/wallets/martian.png' },
-  { name: 'Slush', icon: '/wallets/slush.png' },
-  { name: 'Phantom', icon: '/wallets/phantom.png' }
-]
-
-type WalletAdapter = { name: string }
+function truncateAddress(addr: string, left = 6, right = 6) {
+  if (!addr) return ''
+  return `${addr.slice(0, left)}…${addr.slice(-right)}`
+}
 
 export default function WalletConnectButton() {
-  const { currentWallet, connect, isConnected } = useWalletKit()
-  const [showModal, setShowModal] = useState(false)
-  const availableWallets = useMemo(() => SUI_WALLETS, [])
+  const currentAccount = useCurrentAccount()
+  const { mutateAsync: connect, isPending: isConnecting } = useConnectWallet()
+  const { mutate: disconnect } = useDisconnectWallet()
+  const wallets = useWallets()
 
-  const handleConnect = useCallback(
-    async (walletName: string) => {
-      const adapters: WalletAdapter[] = ((window as any)?.wallets as WalletAdapter[]) ?? []
-      const adapter = adapters.find((wallet) => wallet.name === walletName)
-      if (!adapter) {
-        console.warn(`Wallet ${walletName} not found in window.wallets`)
+  const [open, setOpen] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleConnect(index: number) {
+    try {
+      setError(null)
+      const w = wallets[index]
+      if (!w) {
+        setError('Selected wallet unavailable.')
         return
       }
-      await connect(adapter as any)
-      setShowModal(false)
-    },
-    [connect]
-  )
+      await connect({ wallet: w })
+      setOpen(false)
+    } catch (e: any) {
+      setError(e?.message || 'Failed to connect to wallet')
+    }
+  }
+
+  function handleDisconnect() {
+    try {
+      setError(null)
+      disconnect()
+      setOpen(false)
+    } catch (e: any) {
+      setError(e?.message || 'Failed to disconnect')
+    }
+  }
+
+  const label = currentAccount
+    ? truncateAddress(currentAccount.address)
+    : isConnecting
+    ? 'Connecting…'
+    : 'Connect Wallet'
 
   return (
-    <>
+    <div className="relative inline-block">
+      {/* Μαύρο, pill-shaped κουμπί */}
       <button
-        onClick={() => setShowModal(true)}
-        className="flex items-center gap-3 rounded-full bg-gradient-to-r from-purple-700 to-indigo-800 px-8 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-purple-600 hover:to-indigo-700"
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        disabled={isConnecting}
+        className="flex items-center gap-2 rounded-full border border-zinc-700 bg-black px-6 py-2 font-wizard font-bold text-white shadow-lg transition-all duration-200 hover:shadow-[0_6px_20px_rgba(0,0,0,0.35)] disabled:opacity-80"
       >
-        <span className="text-2xl" role="img" aria-label="magic wand">
-          🪄
-        </span>
-        {isConnected ? <span>{currentWallet?.name} Connected</span> : <span>Connect Wallet</span>}
+        {label}
       </button>
 
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-3xl border-2 border-purple-600 bg-gradient-to-b from-slate-900 to-purple-950 p-8 shadow-2xl">
-            <div className="mb-8 text-center">
-              <h2 className="bg-gradient-to-r from-yellow-400 to-purple-400 bg-clip-text text-3xl font-bold text-transparent">
-                Choose Your Wand
-              </h2>
-              <p className="mt-2 text-sm text-gray-400">Connect with a Sui wallet</p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              {availableWallets.map((wallet) => (
-                <button
-                  className="group flex flex-col items-center gap-3 rounded-2xl border border-purple-500 bg-slate-800 p-6 transition-all duration-200 hover:scale-105 hover:border-yellow-400 hover:bg-slate-700"
-                  key={wallet.name}
-                  onClick={() => handleConnect(wallet.name)}
-                >
-                  <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-gray-700">
-                    <img src={wallet.icon} alt={wallet.name} className="h-12 w-12 object-contain" />
-                  </div>
-                  <span className="text-sm font-medium text-white transition-colors group-hover:text-yellow-400">
-                    {wallet.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setShowModal(false)}
-              className="mt-6 w-full py-3 text-sm font-medium text-gray-400 transition hover:text-white"
+      {open &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+            onClick={() => setOpen(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setOpen(false)
+            }}
+            tabIndex={-1}
+          >
+            <div
+              className="w-full max-w-md rounded-2xl border border-zinc-700 bg-zinc-950 p-5 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="wallet-modal-title"
             >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-    </>
+              <div className="mb-4 text-center">
+                <h2 id="wallet-modal-title" className="text-xl font-bold text-white">Choose a wallet</h2>
+                <p className="mt-1 text-sm text-zinc-400">Connect with a Sui-compatible wallet</p>
+              </div>
+
+              {!currentAccount ? (
+                wallets.length ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    {wallets.map((w, idx) => (
+                      <button
+                        key={w.name}
+                        type="button"
+                        onClick={() => handleConnect(idx)}
+                        disabled={isConnecting}
+                        className="group flex flex-col items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 hover:bg-zinc-900"
+                      >
+                        {'icon' in w && (w as any).icon ? (
+                          <img src={(w as any).icon} alt="" className="h-10 w-10 rounded" />
+                        ) : (
+                          <div className="h-10 w-10 rounded bg-zinc-800 grid place-items-center text-sm text-zinc-400">
+                            {w.name[0]}
+                          </div>
+                        )}
+                        <span className="text-sm font-semibold text-white">{w.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-3 text-sm text-zinc-400">
+                    Δεν βρέθηκαν Sui wallets. Εγκατάστησε ένα (π.χ.{' '}
+                    <a
+                      href="https://wallet.sui.io"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-400 hover:underline"
+                    >
+                      Sui Wallet
+                    </a>
+                    ) και κάνε refresh.
+                  </div>
+                )
+              ) : (
+                <div className="grid gap-3">
+                  <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 font-mono text-sm text-white">
+                    {truncateAddress(currentAccount.address)}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDisconnect}
+                    className="rounded-lg border border-zinc-700 bg-zinc-100 px-3 py-2 text-zinc-900 font-semibold hover:bg-white"
+                  >
+                    Disconnect
+                  </button>
+                </div>
+              )}
+
+              {error && (
+                <div className="mt-3 rounded-lg border border-red-900 bg-red-950/60 px-3 py-2 text-xs text-red-300">
+                  {error}
+                </div>
+              )}
+
+              <div className="mt-5 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-800"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+    </div>
   )
 }

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import MainLayout from '@/components/MainLayout'
 import CheckinGrid from '@/components/CheckinGrid'
 import AchievementList from '@/components/AchievementList'
+import SupporterBadges from '@/components/SupporterBadges'
+import InviteBadges from '@/components/InviteBadges'
 import { Checkins, loadCheckins } from '@/utils/checkin'
 
 export default function Achievements() {
@@ -19,6 +21,8 @@ export default function Achievements() {
         <div className="font-wizard text-3xl glow-text">Achievements</div>
         <CheckinGrid />
         <AchievementList checkins={checkins} />
+        <SupporterBadges />
+        <InviteBadges invitedCount={Number(localStorage.getItem('invitedCount') || 0)} />
       </div>
     </MainLayout>
   )

@@ -10,6 +10,8 @@ import Swap from './pages/Swap'
 import Bridge from './pages/Bridge'
 import YouFoundMe from './pages/YouFoundMe'
 import Leaderboard from './pages/Leaderboard'
+import Invite from './pages/Invite'
+import Coins from './pages/Coins'
 
 export default function App() {
   const location = useLocation()
@@ -45,6 +47,8 @@ export default function App() {
         <Route path="/swap" element={<Swap />} />
         <Route path="/you-found-me" element={<YouFoundMe />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/coins" element={<Coins />} />
+        <Route path="/invite" element={<Invite />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>

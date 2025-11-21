@@ -38,10 +38,10 @@ func (g *Game) Init() {
 	// 2048x2048 world with 24px tiles (do not draw all; render viewport)
 	g.Map = NewTileMap(2048, 2048, 24)
 	g.Player = &Player{
-		X:  float64(g.Map.Width()*g.Map.Tile/2 - 12),
-		Y:  float64(g.Map.Height()*g.Map.Tile/2 - 12),
-		W:  18,
-		H:  18,
+		X:   float64(g.Map.Width()*g.Map.Tile/2 - 12),
+		Y:   float64(g.Map.Height()*g.Map.Tile/2 - 12),
+		W:   18,
+		H:   18,
 		Spd: 220,
 	}
 	g.cameraX = int(g.Player.X) - 200
@@ -121,7 +121,7 @@ func (g *Game) bindTouch() {
 		}
 		t := args[0].Get("touches").Index(0)
 		dx := t.Get("clientX").Float() - startX
-		dy := t.Get("clientY").Float() - startY
+		dy := t.Get("clientY").Float() - startY2
 		// simulate keys
 		g.Input["ArrowLeft"] = dx < -10
 		g.Input["ArrowRight"] = dx > 10
@@ -168,5 +168,3 @@ func clampInt(v, min, max int) int {
 func clampFloat(v, min, max float64) float64 {
 	return math.Max(min, math.Min(max, v))
 }
-
-

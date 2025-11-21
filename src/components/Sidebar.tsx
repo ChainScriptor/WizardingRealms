@@ -11,9 +11,9 @@ const nav = [
   { to: '/wizard-lands', label: 'Wizard Lands', icon: '🧙‍♂️', external: true },
   { to: '/achievements', label: 'Achievements', icon: '🏆' },
   { to: '/you-found-me', label: 'You Found Me', icon: '👁️' },
-  { to: '#', label: 'Coins', icon: '🪙' },
+  { to: '/coins', label: 'Coins', icon: '🪙' },
   { to: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
-  { to: '#', label: 'Invite a Friend', icon: '🪄' }
+  { to: '/invite', label: 'Invite a Friend', icon: '🪄' }
 ]
 
 export default function Sidebar() {
