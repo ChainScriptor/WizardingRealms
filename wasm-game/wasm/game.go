@@ -48,7 +48,7 @@ func (g *Game) Init() {
 	g.cameraY = int(g.Player.Y) - 150
 	g.bindTouch()
 	g.bindZoom()
-	g.loadHeroSprite()
+	g.loadHeroSprite() //TODO: bot halucinations
 }
 
 func (g *Game) Update(dt float64) {
@@ -121,7 +121,7 @@ func (g *Game) bindTouch() {
 		}
 		t := args[0].Get("touches").Index(0)
 		dx := t.Get("clientX").Float() - startX
-		dy := t.Get("clientY").Float() - startY2
+		dy := t.Get("clientY").Float() - startY
 		// simulate keys
 		g.Input["ArrowLeft"] = dx < -10
 		g.Input["ArrowRight"] = dx > 10
