@@ -31,6 +31,8 @@ export default function WalletConnectButton() {
       }
       await connect({ wallet: w })
       setOpen(false)
+      // User registration will happen automatically via useWalletRegistration hook
+      // which is called in App.tsx
     } catch (e: any) {
       setError(e?.message || 'Failed to connect to wallet')
     }

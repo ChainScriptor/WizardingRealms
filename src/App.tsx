@@ -12,10 +12,22 @@ import YouFoundMe from './pages/YouFoundMe'
 import Leaderboard from './pages/Leaderboard'
 import Invite from './pages/Invite'
 import Coins from './pages/Coins'
+import { useReferralTracking } from './hooks/useReferralTracking'
+import { useWalletRegistration } from './hooks/useWalletRegistration'
+import { useBadgeSync } from './hooks/useBadgeSync'
 
 export default function App() {
   const location = useLocation()
   const isWizardLands = location.pathname === '/wizard-lands'
+  
+  // Automatically register user in MongoDB when wallet connects
+  useWalletRegistration()
+  
+  // Sync all badges/achievements to MongoDB when wallet connects
+  useBadgeSync()
+  
+  // Track referrals when user visits with ?ref= parameter
+  useReferralTracking()
   return (
     <div className="min-h-screen bg-parchment-900 relative">
       {/* Video Background */}

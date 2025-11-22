@@ -1,4 +1,6 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useCurrentAccount } from '@mysten/dapp-kit'
+import { achievementsAPI } from '@/services/api'
 
 type InviteBadge = {
   id: string
@@ -39,9 +41,56 @@ function Icon({ type, className }: { type: InviteBadge['icon']; className?: stri
 }
 
 export default function InviteBadges({ invitedCount = 0 }: { invitedCount?: number }) {
-  const unlockedIds = useMemo(() => {
+  const currentAccount = useCurrentAccount()
+  const walletAddress = currentAccount?.address || null
+  const [unlockedBadges, setUnlockedBadges] = useState<Set<string>>(new Set())
+
+  // Load unlocked badges from MongoDB
+  useEffect(() => {
+    async function loadBadges() {
+      if (!walletAddress) return
+      try {
+        const data = await achievementsAPI.getAchievements(walletAddress)
+        setUnlockedBadges(new Set(data.unlockedInviteBadges || []))
+      } catch (error) {
+        console.error('Error loading invite badges:', error)
+      }
+    }
+    loadBadges()
+  }, [walletAddress])
+
+  // Calculate which badges should be unlocked based on invitedCount
+  const shouldBeUnlocked = useMemo(() => {
     return new Set(BADGES.filter((b) => invitedCount >= b.needed).map((b) => b.id))
   }, [invitedCount])
+
+  // Auto-unlock badges when threshold is reached
+  useEffect(() => {
+    async function checkAndUnlock() {
+      if (!walletAddress) return
+
+      for (const badge of BADGES) {
+        if (invitedCount >= badge.needed && !unlockedBadges.has(badge.id)) {
+          try {
+            await achievementsAPI.unlockInviteBadge(walletAddress, badge.id, badge.xp)
+            setUnlockedBadges((prev) => new Set([...prev, badge.id]))
+            console.log(`Unlocked invite badge: ${badge.name}`)
+          } catch (error) {
+            console.error(`Error unlocking invite badge ${badge.id}:`, error)
+          }
+        }
+      }
+    }
+    checkAndUnlock()
+  }, [invitedCount, walletAddress, unlockedBadges])
+
+  // Use unlocked badges from DB, fallback to calculated if not loaded yet
+  const unlockedIds = useMemo(() => {
+    if (unlockedBadges.size > 0) {
+      return unlockedBadges
+    }
+    return shouldBeUnlocked
+  }, [unlockedBadges, shouldBeUnlocked])
 
   return (
     <div className="rounded-xl bg-zinc-900/70 ring-1 ring-zinc-700/60 p-4">

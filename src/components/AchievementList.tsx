@@ -1,5 +1,7 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useCurrentAccount } from '@mysten/dapp-kit'
 import { Checkins, computeStreak } from '@/utils/checkin'
+import { achievementsAPI, userAPI } from '@/services/api'
 
 type Ach = { id: string; title: string; desc?: string; threshold: number; xp?: number }
 
@@ -18,14 +20,71 @@ const ACHIEVEMENTS: Ach[] = [
 ]
 
 export default function AchievementList({ checkins }: { checkins: Checkins }) {
-  const streak = useMemo(() => computeStreak(checkins), [checkins])
+  const currentAccount = useCurrentAccount()
+  const walletAddress = currentAccount?.address || null
+  const [streak, setStreak] = useState(0)
+  const [unlockedAchievements, setUnlockedAchievements] = useState<Set<string>>(new Set())
+  
+  // Load current streak from MongoDB (calculated by backend)
+  useEffect(() => {
+    async function loadStreak() {
+      if (!walletAddress) {
+        // Fallback to local calculation if no wallet
+        setStreak(computeStreak(checkins))
+        return
+      }
+      try {
+        const user = await userAPI.getUser(walletAddress)
+        setStreak(user.currentStreak || 0)
+      } catch (error) {
+        console.error('Error loading streak:', error)
+        // Fallback to local calculation
+        setStreak(computeStreak(checkins))
+      }
+    }
+    loadStreak()
+  }, [walletAddress, checkins])
+
+  // Load unlocked achievements
+  useEffect(() => {
+    async function loadAchievements() {
+      if (!walletAddress) return
+      try {
+        const data = await achievementsAPI.getAchievements(walletAddress)
+        setUnlockedAchievements(new Set(data.unlockedAchievements || []))
+      } catch (error) {
+        console.error('Error loading achievements:', error)
+      }
+    }
+    loadAchievements()
+  }, [walletAddress])
+
+  // Auto-unlock achievements when streak threshold is reached
+  useEffect(() => {
+    async function checkAndUnlock() {
+      if (!walletAddress) return
+
+      for (const achievement of ACHIEVEMENTS) {
+        if (streak >= achievement.threshold && !unlockedAchievements.has(achievement.id)) {
+          try {
+            await achievementsAPI.unlockAchievement(walletAddress, achievement.id, achievement.xp || 0)
+            setUnlockedAchievements((prev) => new Set([...prev, achievement.id]))
+            console.log(`Unlocked achievement: ${achievement.title}`)
+          } catch (error) {
+            console.error(`Error unlocking achievement ${achievement.id}:`, error)
+          }
+        }
+      }
+    }
+    checkAndUnlock()
+  }, [streak, walletAddress, unlockedAchievements])
 
   return (
     <div className="rounded-xl bg-zinc-900/70 ring-1 ring-zinc-700/60 p-4">
       <div className="font-semibold mb-3">Achievements</div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {ACHIEVEMENTS.map((a, index) => {
-          const unlocked = streak >= a.threshold
+          const unlocked = unlockedAchievements.has(a.id) || streak >= a.threshold
           const badgeNumber = index + 2 // 2.png, 3.png, ..., 13.png
           return (
             <div

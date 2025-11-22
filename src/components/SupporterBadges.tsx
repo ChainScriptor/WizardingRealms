@@ -1,5 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useCurrentAccount } from '@mysten/dapp-kit'
+import { achievementsAPI } from '@/services/api'
 
 type SupporterBadge = {
   id: string
@@ -80,9 +82,33 @@ function Icon({ type, className }: { type: SupporterBadge['icon']; className?: s
   }
 }
 
-export default function SupporterBadges({ unlockedIds = [] as string[] }: { unlockedIds?: string[] }) {
-  const unlockedSet = useMemo(() => new Set(unlockedIds), [unlockedIds])
+export default function SupporterBadges({ unlockedIds: propUnlockedIds = [] as string[] }: { unlockedIds?: string[] }) {
+  const currentAccount = useCurrentAccount()
+  const walletAddress = currentAccount?.address || null
+  const [unlockedBadges, setUnlockedBadges] = useState<Set<string>>(new Set(propUnlockedIds))
   const [selected, setSelected] = useState<SupporterBadge | null>(null)
+
+  // Load unlocked badges from MongoDB
+  useEffect(() => {
+    async function loadBadges() {
+      if (!walletAddress) {
+        // Use prop if no wallet
+        setUnlockedBadges(new Set(propUnlockedIds))
+        return
+      }
+      try {
+        const data = await achievementsAPI.getAchievements(walletAddress)
+        setUnlockedBadges(new Set(data.unlockedSupporterBadges || []))
+      } catch (error) {
+        console.error('Error loading supporter badges:', error)
+        // Fallback to prop
+        setUnlockedBadges(new Set(propUnlockedIds))
+      }
+    }
+    loadBadges()
+  }, [walletAddress, propUnlockedIds])
+
+  const unlockedSet = useMemo(() => unlockedBadges, [unlockedBadges])
 
   return (
     <div className="rounded-xl bg-zinc-900/70 ring-1 ring-zinc-700/60 p-4">

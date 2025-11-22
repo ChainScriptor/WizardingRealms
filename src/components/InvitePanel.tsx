@@ -1,9 +1,12 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useCurrentAccount } from '@mysten/dapp-kit'
+import { userAPI } from '@/services/api'
 
 export default function InvitePanel() {
   const current = useCurrentAccount()
+  const walletAddress = current?.address || null
   const [copied, setCopied] = useState(false)
+  const [invitedCount, setInvitedCount] = useState(0)
 
   const referralCode = useMemo(() => {
     const base = current?.address ?? 'guest'
@@ -14,6 +17,24 @@ export default function InvitePanel() {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://wizarding.realms'
     return `${origin}/?ref=${referralCode}`
   }, [referralCode])
+
+  useEffect(() => {
+    async function loadInvitedCount() {
+      if (walletAddress) {
+        try {
+          const user = await userAPI.getUser(walletAddress)
+          setInvitedCount(user.invitedCount || 0)
+        } catch (error) {
+          console.error('Error loading invited count:', error)
+          // Fallback to localStorage
+          setInvitedCount(Number(localStorage.getItem('invitedCount') || 0))
+        }
+      } else {
+        setInvitedCount(Number(localStorage.getItem('invitedCount') || 0))
+      }
+    }
+    loadInvitedCount()
+  }, [walletAddress])
 
   const shareOnTelegram = () => {
     const text = `Join me in Wizarding Realms!`
@@ -30,8 +51,6 @@ export default function InvitePanel() {
       setCopied(false)
     }
   }
-
-  const invitedCount = Number(localStorage.getItem('invitedCount') || 0)
 
   return (
     <div className="rounded-2xl bg-gradient-to-b from-zinc-950 to-zinc-900 ring-1 ring-zinc-800 p-6 text-white relative">
