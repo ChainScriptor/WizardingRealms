@@ -127,3 +127,23 @@ td, th {
   animation: fade-in 0.3s ease-out;
 }
 
+/* Slow horizontal background movement for 3D effect */
+@keyframes slow-pan {
+  0%, 100% {
+    background-position: 50% 50%;
+  }
+  25% {
+    background-position: 52% 50%;
+  }
+  50% {
+    background-position: 50% 50%;
+  }
+  75% {
+    background-position: 48% 50%;
+  }
+}
+
+.animate-slow-pan {
+  animation: slow-pan 20s ease-in-out infinite;
+}
+

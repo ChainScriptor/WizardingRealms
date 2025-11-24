@@ -14,6 +14,7 @@ export default function WizardLands() {
   const [gameOpen, setGameOpen] = useState(false)
   const [bagOpen, setBagOpen] = useState(false)
   const [papyrusOpen, setPapyrusOpen] = useState(false)
+  const [fullscreenOpen, setFullscreenOpen] = useState(false)
   const bagItems = [
     { imageUrl: '/2.png', amount: 186.62 },
     { imageUrl: '/3.png', amount: 11.33 },
@@ -35,10 +36,20 @@ export default function WizardLands() {
     <div className="min-h-screen relative overflow-hidden">
       {/* Background */}
       <div
-        className="absolute inset-0 bg-cover bg-center"
+        className="absolute inset-0 bg-cover bg-center animate-slow-pan"
         style={{ backgroundImage: `url(${BG_PRIMARY}), url(${BG_FALLBACK})` }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-black/20" />
+
+      {/* Hero SVG - Center of screen, always visible */}
+      <div className="fixed inset-0 z-15 flex items-center justify-center pointer-events-none">
+        <img
+          src="/hero1.svg"
+          alt="Hero"
+          className="w-auto h-auto object-contain"
+          style={{ maxWidth: '80vw', maxHeight: '80vh' }}
+        />
+      </div>
 
       {/* Top wood-like bar */}
       <div className="relative z-10">
@@ -110,6 +121,8 @@ export default function WizardLands() {
                 onClick={() => {
                   if (i === 0) {
                     setPapyrusOpen(!papyrusOpen)
+                  } else {
+                    setFullscreenOpen(true)
                   }
                 }}
                 className="h-36 w-full rounded-xl overflow-hidden hover:scale-105 transition-transform relative flex items-center justify-center"
@@ -151,6 +164,42 @@ export default function WizardLands() {
           </div>
         </div>
       </StoneMenu>
+
+      {/* Centered Panel with 6.svg */}
+      {fullscreenOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+          <div className="relative flex items-center justify-center">
+            <img
+              src="/papyrus/6.svg"
+              alt="Centered Panel"
+              className="w-auto h-auto object-contain"
+              style={{ maxWidth: '90vw', maxHeight: '90vh' }}
+            />
+            <button
+              onClick={() => setFullscreenOpen(false)}
+              className="absolute top-4 right-4 z-60 rounded-full bg-black/70 hover:bg-black/90 p-2 transition-colors"
+              aria-label="Close panel"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="text-white"
+              >
+                <path
+                  d="M18 6L6 18M6 6l12 12"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {gameOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4">
